@@ -1,0 +1,51 @@
+version: '1.0'
+services:
+  postgres:
+    container_name: postgresResumeDB
+    image: postgres
+    volumes:
+      - postgres-resume-data:/var/lib/mysql
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DATABASE: resumesDB
+      POSTGRES_PASSWORD: angad@db
+    networks:
+      - resume-details-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: 'angadraut89@gmail.com'
+      PGADMIN_DEFAULT_PASSWORD: angad@db
+    ports:
+      - 16543:80
+    volumes:
+      - ./servers.json:/pgadmin4/servers.json
+    networks:
+      - resume-details-network
+
+  resume-service-app:
+    image: resume-details
+    restart: always
+    build: .
+    ports:
+      - 1994:1994
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_HOST: postgresResumeDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: angad@db
+      POSTGRES_PORT: 5432
+    networks:
+      - resume-details-network
+
+networks:
+  resume-details-network:
+    driver: bridge
+
+volumes:
+  postgres-resume-data:
+    driver: local
+
